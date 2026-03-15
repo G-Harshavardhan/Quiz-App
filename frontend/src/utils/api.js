@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Base API instance
 const api = axios.create({
-    baseURL: 'quiz-app-production-72cb.up.railway.app',
+    baseURL: 'https://quiz-app-production-72cb.up.railway.app/api',
     headers: {
         'Content-Type': 'application/json',
     },
