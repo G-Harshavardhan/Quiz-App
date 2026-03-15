@@ -1,4 +1,5 @@
-# AI-Powered Quiz Application
+# Quiz App | Learn & Ace
+[![Live Demo](https://img.shields.io/badge/demo-online-brightgreen)](https://ai-quiz-online.vercel.app/)
 
 A high-performance fullstack application that enables users to generate dynamic, AI-powered multiple-choice quizzes, track their performance, and review their history with detailed analytics. Built for scalability and developer experience using **Next.js**, **Django**, and **Groq AI**.
 
@@ -40,13 +41,67 @@ The AI Quiz App is designed to turn any topic into a learning opportunity. By le
 
 ## 🏛️ Architecture & Database Design
 
-### Data Models
-1.  **User**: Custom user model (`accounts.User`) supporting both Username and Email logins.
-2.  **Quiz**: Metadata for the generated set (`topic`, `difficulty`, `num_questions`).
-3.  **Question**: Text-based questions linked to a `Quiz`.
-4.  **AnswerChoice**: Options (4 per question) with a `is_correct` flag.
-5.  **QuizAttempt**: Tracks a user's specific performance on a quiz (`score`, `completed_at`).
-6.  **UserAnswer**: Maps a user's choice to a specific question to allow post-quiz reviews.
+### Data Models & Relationships
+
+1.  **User Model** (`accounts.User`)
+    *   Extends `AbstractUser`.
+    *   **Relationships**: 
+        *   `One-to-Many` with `Quiz` (Owner of a generated quiz).
+        *   `One-to-Many` with `QuizAttempt` (History tracking).
+
+2.  **Quiz Model** (`quizzes.Quiz`)
+    *   Stores metadata: `topic`, `difficulty`, `num_questions`.
+    *   **Relationships**:
+        *   `Many-to-One` with `User`.
+        *   `One-to-Many` with `Question` (Cascade delete enabled).
+
+3.  **Question Model** (`quizzes.Question`)
+    *   Stores the AI-generated question text.
+    *   **Relationships**:
+        *   `Many-to-One` with `Quiz`.
+        *   `One-to-Many` with `AnswerChoice`.
+
+4.  **AnswerChoice Model** (`quizzes.AnswerChoice`)
+    *   Stores option text and `is_correct` boolean.
+    *   **Relationships**:
+        *   `Many-to-One` with `Question`.
+
+5.  **QuizAttempt Model** (`quizzes.QuizAttempt`)
+    *   Stores result data: `score`, `percentage`, `completed_at`.
+    *   **Relationships**:
+        *   `Many-to-One` with `User`.
+        *   `Many-to-One` with `Quiz`.
+        *   `One-to-Many` with `UserAnswer`.
+
+6.  **UserAnswer Model** (`quizzes.UserAnswer`)
+    *   Logs specific choices made during an attempt.
+    *   **Relationships**:
+        *   `Many-to-One` with `QuizAttempt`.
+        *   `Many-to-One` with `Question`.
+        *   `Many-to-One` with `AnswerChoice`.
+
+### API Structure
+
+#### Authentication (`/api/accounts/`)
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `register` | `POST` | Create a new user account |
+| `login` | `POST` | Authenticate and receive JWT tokens |
+| `logout` | `POST` | Blacklist refresh token and end session |
+| `profile` | `GET` | Retrieve current user's details |
+| `delete` | `DELETE` | Permanently remove user account and data |
+| `token/refresh` | `POST` | Acquire new access token using refresh token |
+
+#### Quiz Logic (`/api/quizzes/`)
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `generate` | `POST` | Trigger AI quiz generation (topic, difficulty) |
+| `history` | `GET` | List all past quiz attempts for the user |
+| `attempts/<id>` | `DELETE` | Delete a specific quiz attempt from history |
+| `attempts/<id>/review`| `GET` | Get detailed review of a past attempt |
+| `<id>` | `GET` | Fetch quiz details and questions |
+| `<id>/submit` | `POST` | Submit answers for a specific quiz |
+| `<id>/review` | `GET` | Immediate review results after submission |
 
 ---
 
@@ -75,56 +130,31 @@ npm run dev
 
 ---
 
-## 🚀 Deployment Guide
-
-Follow these steps to take your application from local to live.
-
-### 1. Database (Neon.tech - Recommended Free Tier)
-1.  **Sign Up**: Create a free account on [Neon.tech](https://neon.tech/).
-2.  **Project**: Create a new project and select "PostgreSQL".
-3.  **Connection String**: Copy the **Connection String** (it starts with `postgres://`). You will need this for the backend.
-
-### 2. Backend (Render.com)
-1.  **GitHub**: Push your `backend/` folder to a new GitHub repository.
-2.  **Render**: Create a "Web Service" on [Render](https://render.com/).
-3.  **Configure**:
-    *   **Build Command**: `pip install -r requirements.txt`
-    *   **Start Command**: `gunicorn quiz_project.wsgi` (Render detects the Procfile, but you can set this manually).
-4.  **Environment Variables**: Add these in the "Env Vars" tab:
-    *   `DATABASE_URL`: (The connection string from Neon)
-    *   `GROQ_API_KEY`: (Your Key)
-    *   `ALLOWED_HOSTS`: `*`
-    *   `CORS_ALLOWED_ORIGINS`: `https://YOUR_VERCEL_APP_URL.vercel.app`
-    *   `SECRET_KEY`: (Any random string)
-    *   `DEBUG`: `False`
-
-### 3. Frontend (Vercel)
-1.  **GitHub**: Push your `frontend/` folder to GitHub.
-2.  **Vercel**: Import the project.
-3.  **Rewrites**: Open [`vercel.json`](file:///d:/OneDrive/Desktop/Code%20editor/quiz_app/frontend/vercel.json) and replace `YOUR_RAILWAY_APP_URL` with your **Render Web Service URL**.
-4.  **Deploy**: Hit deploy!
-
----
-
 ## 💡 Technical Decisions & Challenges
 
 ### 1. The LLM Pivot: From Gemini to Groq
-**Challenge**: Initially, we integrated Google Gemini Pro. However, we faced inconsistent API versioning (404s on stable endpoints) and significant latency (8-10s per quiz).
-**Solution**: Pivoted to **Groq (Llama 3.3 70b)**.
-**Result**: Near-instantaneous quiz generation (< 2s) and 100% reliable JSON schema enforcement.
+- **Challenge**: Initially, we integrated Google Gemini Pro. However, we faced inconsistent API versioning (404s on stable endpoints) and significant latency (8-10s per quiz).
+- **Solution**: Pivoted to **Groq (Llama 3.3 70b)**.
+- **Result**: Near-instantaneous quiz generation (< 2s) and 100% reliable JSON schema enforcement.
 
 ### 2. JWT "Ghost" Sessions
-**Challenge**: Users remained "logged in" visually when tokens expired, causing 401 errors on background fetches like History.
-**Solution**: Implemented a **Double-Axios Interceptor**. One interceptor attaches the token to every request, while a second "Response" interceptor catches 401s, silently calls `/token/refresh`, and retries the original request.
+- **Challenge**: Users remained "logged in" visually when tokens expired, causing 401 errors on background fetches like History or Profile.
+- **Solution**: Implemented a **Double-Axios Interceptor** system. A "Response" interceptor monitors 401 Unauthorized status codes, triggers a silent `/token/refresh` with the stored Refresh Token, and retries the failed request.
+- **Result**: A seamless session experience where tokens are handled silently without interrupting the user flow.
 
 ### 3. Database Atomicity
-**Challenge**: Large quiz sets (20 Qs + 80 Choices) could lead to partial data if the API failed mid-loop.
-**Solution**: Wrapped AI generation in a `transaction.atomic()` block.
-**Result**: Guaranteed data integrity for every generated quiz.
+- **Challenge**: Large quiz sets (20 Qs + 80 Choices) could lead to "dirty data" if the LLM output was malformed or the API failed mid-loop.
+- **Solution**: Wrapped the entire AI generation and database seeding logic in a `transaction.atomic()` block.
+- **Result**: Guaranteed data integrity; the system ensures that either the entire quiz is created perfectly, or no records are created at all.
+
+### 4. Glassmorphic Performance Optimization
+- **Challenge**: Heavy use of `backdrop-filter: blur()` and complex gradients caused significant frame-rate drops (jank) on mobile devices and low-end hardware.
+- **Solution**: Optimized CSS by using `will-change: transform` to trigger GPU acceleration and restricted heavy blur effects only to core structural elements (Nav, Panels).
+- **Result**: Achieved a buttery-smooth 60fps experience across all modern devices without sacrificing the premium aesthetic.
 
 ---
 
 ## ⏭️ Skipped Features
 
-1.  **Social Login**: Focus remained on custom JWT logic.
-2.  **Leaderboards**: Deprioritized to ensure sub-second AI generation speed and polished core mechanics.
+1.  **Social Login**: Focus remained on custom JWT logic for maximum control over security.
+2.  **Leaderboards**: Deprioritized to ensure sub-second AI generation speed and polished core mechanics for the MVP.
