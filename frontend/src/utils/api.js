@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Base API instance
 const api = axios.create({
-    baseURL: '/api', // Using rewrites in next.config.js to hit Django server
+    baseURL: 'quiz-app-production-72cb.up.railway.app',
     headers: {
         'Content-Type': 'application/json',
     },
