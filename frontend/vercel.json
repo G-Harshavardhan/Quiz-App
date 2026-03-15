@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "quiz-app-production-72cb.up.railway.app/api/$1"
+            "destination": "https://quiz-app-production-72cb.up.railway.app/api/$1"
         }
     ]
 }
