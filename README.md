@@ -1,4 +1,5 @@
-# Quiz App | Learn & Ace - https://ai-quiz-online.vercel.app
+# Quiz App | Learn & Ace
+App live on https://ai-quiz-online.vercel.app
 
 A high-performance fullstack application that enables users to generate dynamic, AI-powered multiple-choice quizzes, track their performance, and review their history with detailed analytics. Built for scalability and developer experience using **Next.js**, **Django**, and **Groq AI**.
 
