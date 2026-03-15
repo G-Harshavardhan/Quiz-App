@@ -4,7 +4,7 @@ const nextConfig = {
         return [
             {
                 source: '/api/:path*',
-                destination: 'http://127.0.0.1:8000/api/:path*'
+                destination: 'quiz-app-production-72cb.up.railway.app/api/:path*'
             }
         ];
     }
