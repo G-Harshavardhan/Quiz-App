@@ -4,7 +4,7 @@ const nextConfig = {
         return [
             {
                 source: '/api/:path*',
-                destination: 'quiz-app-production-72cb.up.railway.app/api/:path*'
+                destination: 'https://quiz-app-production-72cb.up.railway.app/api/:path*'
             }
         ];
     }
