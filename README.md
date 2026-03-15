@@ -1,5 +1,4 @@
-# Quiz App | Learn & Ace
-[![Live Demo](https://img.shields.io/badge/demo-online-brightgreen)](https://ai-quiz-online.vercel.app/)
+# Quiz App | Learn & Ace [![Live Demo](https://img.shields.io/badge/demo-online-brightgreen)](https://ai-quiz-online.vercel.app/)
 
 A high-performance fullstack application that enables users to generate dynamic, AI-powered multiple-choice quizzes, track their performance, and review their history with detailed analytics. Built for scalability and developer experience using **Next.js**, **Django**, and **Groq AI**.
 
