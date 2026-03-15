@@ -130,7 +130,7 @@ npm run dev
 
 ---
 
-## 💡 Selected Technical Challenges
+## 💡 Technical Challenges
 
 ### 1. Automated JWT Session Synchronization
 **Challenge**: Users experienced "Ghost Sessions" where the UI appeared logged in, but background API calls failed due to expired access tokens. Forcing a manual logout or refresh interrupted the user flow and damaged the premium UX.
