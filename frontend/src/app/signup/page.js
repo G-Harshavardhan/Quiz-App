@@ -43,7 +43,7 @@ export default function SignUpPage() {
                 errors.non_field_errors?.[0] ||
                 errors.confirm_password?.[0] ||
                 errorData?.detail ||
-                (err.response ? 'An unexpected error occurred. Please try again.' : 'Cannot connect to server. Please ensure the backend is running.');
+                (err.response ? `Server Error (${err.response.status}). Please check your backend configuration.` : 'Cannot connect to server. Please ensure the backend is running and URL is correct.');
 
             setError(message);
             setFormData(prev => ({ ...prev, password: '', confirm_password: '' }));

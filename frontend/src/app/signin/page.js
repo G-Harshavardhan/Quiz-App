@@ -27,7 +27,7 @@ export default function SignInPage() {
                 errors.password?.[0] ||
                 errors.non_field_errors?.[0] ||
                 errorData?.detail ||
-                (err.response ? 'Invalid credentials or connection error.' : 'Cannot connect to server. Please ensure the backend is running.');
+                (err.response ? `Server error (${err.response.status}). Check backend configuration.` : 'Cannot connect to server. Check backend URL.');
 
             setError(message);
 
